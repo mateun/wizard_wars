@@ -1,0 +1,8 @@
+c:\users\martin\documents\visual studio 2017\Projects\OpenGLTest1\OpenGLTest1\bin\Debug\OpenGLTest1.exe.config
+c:\users\martin\documents\visual studio 2017\Projects\OpenGLTest1\OpenGLTest1\bin\Debug\OpenGLTest1.exe
+c:\users\martin\documents\visual studio 2017\Projects\OpenGLTest1\OpenGLTest1\bin\Debug\OpenGLTest1.pdb
+c:\users\martin\documents\visual studio 2017\Projects\OpenGLTest1\OpenGLTest1\bin\Debug\OpenTK.dll
+c:\users\martin\documents\visual studio 2017\Projects\OpenGLTest1\OpenGLTest1\bin\Debug\OpenTK.xml
+c:\users\martin\documents\visual studio 2017\Projects\OpenGLTest1\OpenGLTest1\obj\Debug\OpenGLTest1.csprojResolveAssemblyReference.cache
+c:\users\martin\documents\visual studio 2017\Projects\OpenGLTest1\OpenGLTest1\obj\Debug\OpenGLTest1.exe
+c:\users\martin\documents\visual studio 2017\Projects\OpenGLTest1\OpenGLTest1\obj\Debug\OpenGLTest1.pdb
