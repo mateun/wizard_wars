@@ -53,21 +53,14 @@ namespace OpenGLTest1
                 Exit();
         }
 
-        protected override void OnRenderFrame(FrameEventArgs e)
+        private void drawTexturedQuads()
         {
-            base.OnRenderFrame(e);
-
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            Matrix4 modelview = Matrix4.LookAt(new Vector3(0, 0, 30), Vector3.UnitZ, Vector3.UnitY);
-            GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadMatrix(ref modelview);
             GL.Enable(EnableCap.Texture2D);
 
             GL.BindTexture(TextureTarget.Texture2D, textureIdCastle);
             GL.Begin(BeginMode.Quads);
 
-            GL.Color3(1.0f, 1.0f, 1.0f); GL.TexCoord2(0, 1); GL.Vertex3(-1.0f, -1.0f, 4.0f); 
+            GL.Color3(1.0f, 1.0f, 1.0f); GL.TexCoord2(0, 1); GL.Vertex3(-1.0f, -1.0f, 4.0f);
             GL.Color3(1.0f, 1.0f, 1.0f); GL.TexCoord2(1, 1); GL.Vertex3(1.0f, -1.0f, 4.0f);
             GL.Color3(1.0f, 1.0f, 1.0f); GL.TexCoord2(1, 0); GL.Vertex3(1.0f, 1.0f, 4.0f);
             GL.Color3(1.0f, 1.0f, 1.0f); GL.TexCoord2(0, 0); GL.Vertex3(-1.0f, 1.0f, 4.0f);
@@ -77,17 +70,75 @@ namespace OpenGLTest1
             GL.BindTexture(TextureTarget.Texture2D, textureIdHouse);
             GL.Begin(BeginMode.Quads);
 
-            for (int i = 10; i > 0; i-=2)
+            for (int i = 10; i > 0; i -= 2)
             {
                 GL.Color3(1.0f, 1.0f, 1.0f); GL.TexCoord2(0, 1); GL.Vertex3((-i), -1.0f, 4.0f);
-                GL.Color3(1.0f, 1.0f, 1.0f); GL.TexCoord2(1, 1); GL.Vertex3((-i)+2, -1.0f, 4.0f);
-                GL.Color3(1.0f, 1.0f, 1.0f); GL.TexCoord2(1, 0); GL.Vertex3((-i)+2, 1.0f, 4.0f);
+                GL.Color3(1.0f, 1.0f, 1.0f); GL.TexCoord2(1, 1); GL.Vertex3((-i) + 2, -1.0f, 4.0f);
+                GL.Color3(1.0f, 1.0f, 1.0f); GL.TexCoord2(1, 0); GL.Vertex3((-i) + 2, 1.0f, 4.0f);
                 GL.Color3(1.0f, 1.0f, 1.0f); GL.TexCoord2(0, 0); GL.Vertex3((-i), 1.0f, 4.0f);
             }
 
             GL.End();
+        }
 
-            
+        protected override void OnRenderFrame(FrameEventArgs e)
+        {
+            base.OnRenderFrame(e);
+
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+            Matrix4 modelview = Matrix4.LookAt(new Vector3(0, 0, 30), Vector3.UnitZ, Vector3.UnitY);
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.LoadMatrix(ref modelview);
+
+
+            // Draw a single hex in the center of the screen
+            GL.Begin(BeginMode.Triangles);
+            for (int x = 0; x < 3; x++)
+            {
+                for (int y=0; y < 3; y++)
+                {
+                    // left triangle
+                    GL.Color3(1.0f, 1.0f, 1.0f); GL.Vertex3(-0.6, 0.0f, 4.0f);
+                    GL.Color3(1.0f, 1.0f, 1.0f); GL.Vertex3(0.0, -1.0f, 4.0f);
+                    GL.Color3(1.0f, 1.0f, 1.0f); GL.Vertex3(0.0, 1.0f, 4.0f);
+
+                    // right triangle
+                    GL.Color3(1.0f, 1.0f, 1.0f); GL.Vertex3(1.6, 0.0f, 4.0f);
+                    GL.Color3(1.0f, 1.0f, 1.0f); GL.Vertex3(1.0, 1.0f, 4.0f);
+                    GL.Color3(1.0f, 1.0f, 1.0f); GL.Vertex3(1.0, -1.0f, 4.0f);
+
+                    // middle left
+                    GL.Color3(1.0f, 1.0f, 1.0f); GL.Vertex3(0, 1.0f, 4.0f);
+                    GL.Color3(1.0f, 1.0f, 1.0f); GL.Vertex3(0.0, -1.0f, 4.0f);
+                    GL.Color3(1.0f, 1.0f, 1.0f); GL.Vertex3(1.0, -1.0f, 4.0f);
+
+                    // middle right
+                    GL.Color3(1.0f, 1.0f, 1.0f); GL.Vertex3(0, 1.0f, 4.0f);
+                    GL.Color3(1.0f, 1.0f, 1.0f); GL.Vertex3(1.0, -1.0f, 4.0f);
+                    GL.Color3(1.0f, 1.0f, 1.0f); GL.Vertex3(1.0, 1.0f, 4.0f);
+
+                    // second hex
+                    // left triangle
+                    GL.Color3(1.0f, .0f, .0f); GL.Vertex3(1, -1.0f, 4.0f);
+                    GL.Color3(1.0f, .0f, .0f); GL.Vertex3(1.6, -2.0f, 4.0f);
+                    GL.Color3(1.0f, .0f, .0f); GL.Vertex3(1.6, 0.0f, 4.0f);
+
+                    GL.Color3(1.0f, .0f, .0f); GL.Vertex3(1.6, 0.0f, 4.0f);
+                    GL.Color3(1.0f, .0f, .0f); GL.Vertex3(1.6, -2.0f, 4.0f);
+                    GL.Color3(1.0f, .0f, .0f); GL.Vertex3(2.6, -2.0f, 4.0f);
+                    
+                    GL.Color3(1.0f, .0f, .0f); GL.Vertex3(1.6, 0.0f, 4.0f);
+                    GL.Color3(1.0f, .0f, .0f); GL.Vertex3(2.6, -2.0f, 4.0f);
+                    GL.Color3(1.0f, .0f, .0f); GL.Vertex3(2.6, 0.0f, 4.0f);
+
+                    GL.Color3(1.0f, .0f, .0f); GL.Vertex3(3.2, -1.0f, 4.0f);
+                    GL.Color3(1.0f, .0f, .0f); GL.Vertex3(2.6, 0.0f, 4.0f);
+                    GL.Color3(1.0f, .0f, .0f); GL.Vertex3(2.6, -2.0f, 4.0f);
+                }
+            }
+                
+            GL.End();
 
             
 
