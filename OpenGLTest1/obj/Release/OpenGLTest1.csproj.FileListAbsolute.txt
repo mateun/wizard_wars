@@ -5,3 +5,4 @@ c:\users\martin\documents\visual studio 2017\Projects\OpenGLTest1\OpenGLTest1\bi
 c:\users\martin\documents\visual studio 2017\Projects\OpenGLTest1\OpenGLTest1\bin\Release\OpenTK.xml
 c:\users\martin\documents\visual studio 2017\Projects\OpenGLTest1\OpenGLTest1\obj\Release\OpenGLTest1.exe
 c:\users\martin\documents\visual studio 2017\Projects\OpenGLTest1\OpenGLTest1\obj\Release\OpenGLTest1.pdb
+C:\Users\martin\documents\visual studio 2017\Projects\OpenGLTest1\OpenGLTest1\obj\Release\OpenGLTest1.csprojResolveAssemblyReference.cache
