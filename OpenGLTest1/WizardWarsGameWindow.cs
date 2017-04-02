@@ -16,73 +16,82 @@ namespace OpenGLTest1
     class WizardWarsGameWindow : OpenTK.GameWindow
     {
 
-        enum HexTriangleType
-        {
-            Top, 
-            TopRight, 
-            TopLeft, 
-            BotLeft, 
-            BotRight, 
-            Bot
-        }
 
+        int textureIdHouse = 0;
+        int textureIdCastle = 0;
+        int textureIdGrid = 0;
+        int textureIdGrass = 0;
+        lib.HexMap hexMap = null;
 
         public WizardWarsGameWindow() : base(800, 600, GraphicsMode.Default, "WizardWars 0.0.1")
         {
             VSync = VSyncMode.On;
-        }
 
-        int textureIdHouse = 0;
-        int textureIdCastle = 0;
+            lib.Texture _texGrass = new lib.Texture("G:\\Archive\\Pictures\\2D\\Textures\\grass_64x64.png");
+            lib.Texture _texGrassWater = new lib.Texture("G:\\Archive\\Pictures\\2D\\Textures\\grass_water_64x64.png");
+            lib.Texture _texWater = new lib.Texture("G:\\Archive\\Pictures\\2D\\Textures\\water_64x64.png");
+            lib.Texture _texHouse = new lib.Texture("G:\\Archive\\Pictures\\2D\\Textures\\house_64x64_2.png");
+            lib.Texture _texGrid = new lib.Texture("G:\\Archive\\Pictures\\2D\\Textures\\grid_64x64.png");
+            lib.Texture _hexGrid = new lib.Texture("G:\\Archive\\Pictures\\2D\\Textures\\hex_64x64.png");
+            textureIdGrid = _hexGrid.GetId();
 
-        float outerRadius()
-        {
-            return 1;
-            
-        }
-
-        float innerRadius()
-        {
-            return (float)Math.Sqrt(3) / 2 * outerRadius();
-        }
-
-        Vector3[] getHexVectors()
-        {
-            Vector3[] vecs = new Vector3[7];
-
-            vecs[0] =new Vector3(0, 0, 0);
-            vecs[1] = new Vector3(0.5f * outerRadius(), innerRadius(), 0);
-            vecs[2] = new Vector3(-0.5f * outerRadius(), innerRadius(), 0);
-            vecs[3] = new Vector3(-outerRadius(), 0, 0);
-            vecs[4] = new Vector3(-0.5f * outerRadius(), -innerRadius(), 0);
-            vecs[5] = new Vector3(0.5f * outerRadius(), -innerRadius(), 0);
-            vecs[6] = new Vector3(outerRadius(), 0, 0);
-            
-            return vecs;
-        }
-
-        int[] getHexTriangleIndices(HexTriangleType hexTriangleType)
-        {
-            switch (hexTriangleType)
+            List<lib.MapLayer> _mapLayers = new List<lib.MapLayer>();
+            lib.Texture[,] terrainTextures = new lib.Texture[9,9];
+            for (int x = 0; x < 9; x++)
             {
-                case HexTriangleType.Top: return new int[3]{ 0, 1, 2};
-                case HexTriangleType.TopRight: return new int[3] { 0, 6, 1 };
-                case HexTriangleType.TopLeft: return new int[3] { 0, 2, 3 };
-                case HexTriangleType.BotLeft: return new int[3] { 0, 3, 4 };
-                case HexTriangleType.Bot: return new int[3] { 0, 4, 5 };
-                case HexTriangleType.BotRight: return new int[3] { 0, 5, 6 };
-                default: return null;
+                for (int y = 0; y < 9; y++)
+                {
+                    if (x % 2 == 0 && y % 8 == 0)
+                        terrainTextures[x, y] = _texGrass;
+                    else
+                        terrainTextures[x, y] = _texGrass;
+                }
             }
+            lib.MapLayer terrainLayer = new lib.MapLayer(terrainTextures);
+            _mapLayers.Add(terrainLayer);
+
+
+            // Resources layer
+            lib.Texture[,] resourcesTextures = new lib.Texture[9, 9];
+            for (int x = 0; x < 9; x++)
+            {
+                for (int y = 0; y < 9; y++)
+                {
+                    //if (x == 3 && y == 2)
+                        resourcesTextures[x, y] = _texHouse;
+                    //else
+                       // resourcesTextures[x, y] = _texGrass;
+                }
+            }
+            lib.MapLayer resourcesLayer = new lib.MapLayer(resourcesTextures);
+            _mapLayers.Add(resourcesLayer);
+
+            // GridLayer
+            lib.Texture[,] gridTextures = new lib.Texture[9, 9];
+            for (int x = 0; x < 9; x++)
+            {
+                for (int y = 0; y < 9; y++)
+                {
+                    gridTextures[x, y] = _texGrid;
+                }
+            }
+            lib.MapLayer gridLayer = new lib.MapLayer(gridTextures);
+            _mapLayers.Add(gridLayer);
+
+
+            hexMap = new lib.HexMap(new lib.MapDimension(9), new lib.MapDimension(9), _mapLayers);
         }
         
+    
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            GL.ClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            GL.ClearColor(0.3f, 0.3f, 0.3f, 1.0f);
             GL.Enable(EnableCap.DepthTest);
 
-            textureIdHouse = loadImage("G:\\Archive\\Pictures\\2D\\Tilesets\\King\\House32x32.png");
-            textureIdCastle = loadImage("G:\\Archive\\Pictures\\2D\\Tilesets\\King\\castle32x32.png");
+            textureIdHouse = new lib.Texture("G:\\Archive\\Pictures\\2D\\Textures\\house_64x64_2.png").GetId();
+            textureIdGrass = new lib.Texture("G:\\Archive\\Pictures\\2D\\Textures\\grass_16x16.png").GetId();
+            textureIdCastle = new lib.Texture("G:\\Archive\\Pictures\\2D\\Tilesets\\King\\castle32x32.png").GetId();
 
         }
 
@@ -93,8 +102,10 @@ namespace OpenGLTest1
             GL.Viewport(ClientRectangle.X, ClientRectangle.Y, ClientRectangle.Width, ClientRectangle.Height);
 
             Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView((float)Math.PI / 4, Width / (float)Height, 1.0f, 64.0f);
+            Matrix4 orthoProjection = Matrix4.CreateOrthographic(40, 40, 1, 500);
+            orthoProjection = Matrix4.CreateOrthographicOffCenter(0, 800, 600, 0, 1, 100);
             GL.MatrixMode(MatrixMode.Projection);
-            GL.LoadMatrix(ref projection);
+            GL.LoadMatrix(ref orthoProjection);
         }
 
         protected override void OnUpdateFrame(FrameEventArgs e)
@@ -109,146 +120,174 @@ namespace OpenGLTest1
         {
             GL.Enable(EnableCap.Texture2D);
 
+            GL.Enable(EnableCap.Blend);
+            GL.Enable(EnableCap.DepthTest);
+            
+
             GL.BindTexture(TextureTarget.Texture2D, textureIdCastle);
             GL.Begin(BeginMode.Quads);
 
-            GL.Color3(1.0f, 1.0f, 1.0f); GL.TexCoord2(0, 1); GL.Vertex3(-1.0f, -1.0f, 4.0f);
-            GL.Color3(1.0f, 1.0f, 1.0f); GL.TexCoord2(1, 1); GL.Vertex3(1.0f, -1.0f, 4.0f);
-            GL.Color3(1.0f, 1.0f, 1.0f); GL.TexCoord2(1, 0); GL.Vertex3(1.0f, 1.0f, 4.0f);
-            GL.Color3(1.0f, 1.0f, 1.0f); GL.TexCoord2(0, 0); GL.Vertex3(-1.0f, 1.0f, 4.0f);
+            /*GL.Color3(1.0f, 1.0f, 1.0f);*/ GL.TexCoord2(0, 1); GL.Vertex3(-1.0f, -2.0f, 2.0f);
+            /*GL.Color3(1.0f, 1.0f, 1.0f);*/ GL.TexCoord2(1, 1); GL.Vertex3(1.0f, -2.0f, 2.0f);
+            /*GL.Color3(1.0f, 1.0f, 1.0f);*/ GL.TexCoord2(1, 0); GL.Vertex3(1.0f, 2.0f, 2.0f);
+            /*GL.Color3(1.0f, 1.0f, 1.0f);*/ GL.TexCoord2(0, 0); GL.Vertex3(-1.0f, 2.0f, 2.0f);
 
             GL.End();
+
+            GL.BindTexture(TextureTarget.Texture2D, textureIdGrid);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            //GL.Begin(BeginMode.Quads);
+
+            //for (int i = 10; i > -5; i -= 2)
+            //{
+            //    GL.TexCoord2(0, 1); GL.Vertex3((-i), -1.0f, 3.9f);
+            //    GL.TexCoord2(1, 1); GL.Vertex3((-i) + 2, -1.0f, 3.9f);
+            //    GL.TexCoord2(1, 0); GL.Vertex3((-i) + 2, 1.0f, 3.9f);
+            //    GL.TexCoord2(0, 0); GL.Vertex3((-i), 1.0f, 3.9f);
+            //}
+
+            //for (int i = 10; i > -5; i -= 2)
+            //{
+            //    GL.TexCoord2(0, 1); GL.Vertex3((-i) + 1, -2.5f, 4.9f);
+            //    GL.TexCoord2(1, 1); GL.Vertex3((-i) + 2 + 1, -2.5f, 4.9f);
+            //    GL.TexCoord2(1, 0); GL.Vertex3((-i) + 2 + 1, -0.5f, 4.9f);
+            //    GL.TexCoord2(0, 0); GL.Vertex3((-i) + 1, -0.5f, 4.9f);
+            //}
+            
+            //for (int i = 10; i > -5; i -= 2)
+            //{
+            //    GL.TexCoord2(0, 1); GL.Vertex3((-i), -4.0f, 5.9f);
+            //    GL.TexCoord2(1, 1); GL.Vertex3((-i) + 2, -4.0f, 5.9f);
+            //    GL.TexCoord2(1, 0); GL.Vertex3((-i) + 2, -2.0f, 5.9f);
+            //    GL.TexCoord2(0, 0); GL.Vertex3((-i), -2.0f, 5.9f);
+            //}
+
+            //for (int i = 10; i > -5; i -= 2)
+            //{
+            //    GL.TexCoord2(0, 1); GL.Vertex3((-i) + 1, -5.5f, 6.9f);
+            //    GL.TexCoord2(1, 1); GL.Vertex3((-i) + 2 + 1, -5.5f, 6.9f);
+            //    GL.TexCoord2(1, 0); GL.Vertex3((-i) + 2 + 1, -3.5f, 6.9f);
+            //    GL.TexCoord2(0, 0); GL.Vertex3((-i) + 1, -3.5f, 6.9f);
+            //}
+
+
+            //GL.End();
 
             GL.BindTexture(TextureTarget.Texture2D, textureIdHouse);
             GL.Begin(BeginMode.Quads);
-
-            for (int i = 10; i > 0; i -= 2)
+            for (int i = 10; i > -5; i -= 2)
             {
-                GL.Color3(1.0f, 1.0f, 1.0f); GL.TexCoord2(0, 1); GL.Vertex3((-i), -1.0f, 4.0f);
-                GL.Color3(1.0f, 1.0f, 1.0f); GL.TexCoord2(1, 1); GL.Vertex3((-i) + 2, -1.0f, 4.0f);
-                GL.Color3(1.0f, 1.0f, 1.0f); GL.TexCoord2(1, 0); GL.Vertex3((-i) + 2, 1.0f, 4.0f);
-                GL.Color3(1.0f, 1.0f, 1.0f); GL.TexCoord2(0, 0); GL.Vertex3((-i), 1.0f, 4.0f);
+                GL.TexCoord2(0, 1); GL.Vertex3((-i), -4.0f, 6.9f);
+                GL.TexCoord2(1, 1); GL.Vertex3((-i) + 2, -4.0f, 6.9f);
+                GL.TexCoord2(1, 0); GL.Vertex3((-i) + 2, -2.0f, 6.9f);
+                GL.TexCoord2(0, 0); GL.Vertex3((-i), -2.0f, 6.9f);
             }
 
             GL.End();
+
+            float h = 4;
+            float r = 0.866025f;
+            float s = 8;
+
+            for (int row = 0; row < 12; row++)
+            {
+                    int v = row & 1;
+                    GL.BindTexture(TextureTarget.Texture2D, textureIdGrass);
+                    GL.Begin(PrimitiveType.Quads);
+                
+                    for (int i = 0; i < 20; i += 1)
+                    {
+                        GL.TexCoord2(0, 1); GL.Vertex3((i * 34 * r + (row & 1) * r*16),         row * (h+s)*2,          6.9f + row*0.1);
+                        GL.TexCoord2(1, 1); GL.Vertex3((i * 34 * r + (row & 1) * r*16 + 32),    row * (h+s)*2,          6.9f + row*0.1);
+                        GL.TexCoord2(1, 0); GL.Vertex3((i * 34 * r + (row & 1) * r*16 + 32),    row * (h+s)*2 + 32,     6.9f + row*0.1);
+                        GL.TexCoord2(0, 0); GL.Vertex3((i * 34 * r + (row & 1) * r*16),         row * (h+s)*2 + 32,     6.9f + row*0.1);
+                    }
+               
+                    GL.End();
+                
+            }
+
+            GL.BindTexture(TextureTarget.Texture2D, textureIdHouse);
+            GL.Begin(BeginMode.Quads);
+            //for (int i = 0; i < 10; i += 1)
+            //{
+            //    GL.TexCoord2(0, 1); GL.Vertex3((i * 64),      64.0f, 17.9f);
+            //    GL.TexCoord2(1, 1); GL.Vertex3((i * 64) + 64, 64.0f, 17.9f);
+            //    GL.TexCoord2(1, 0); GL.Vertex3((i * 64) + 64, 0.0f, 17.9f);
+            //    GL.TexCoord2(0, 0); GL.Vertex3((i * 64),      0.0f, 17.9f);
+            //}
+
+            GL.End();
+
+
         }
 
-        protected void drawHex(Vector3 position, Vector3 color)
+        void drawPixels()
         {
-            Vector3[] hexVectors = getHexVectors();
-            int[] top = getHexTriangleIndices(HexTriangleType.Top);
-            int[] topRight = getHexTriangleIndices(HexTriangleType.TopRight);
-            int[] topLeft = getHexTriangleIndices(HexTriangleType.TopLeft);
-            int[] botLeft = getHexTriangleIndices(HexTriangleType.BotLeft);
-            int[] bot = getHexTriangleIndices(HexTriangleType.Bot);
-            int[] botRight = getHexTriangleIndices(HexTriangleType.BotRight);
+            byte[] rasters =
+            {
+                0xff, 0xff, 0xff, 0xff,
+                0xff, 0xff, 0xff, 0xff,
+                0xcf, 0xcf, 0xff, 0xff,
+                0xff, 0xcf, 0xff, 0xff,
+                0xc0, 0xcf, 0xcf, 0xc0,
+                0xcf, 0xcf, 0xff, 0xc0,
+                0xff, 0xcf, 0xcf, 0xff,
+                0xff, 0xff, 0xff, 0xc0,
+            };
+            GL.RasterPos2(10, 10);
+            GL.Bitmap(4, 8, 0, 0, 0, 0, rasters);
+        }
 
-            for (int i = 0; i < 3; i++) { GL.Color3(color); GL.Vertex3((position + (hexVectors[top[i]])).X, (position + hexVectors[top[i]]).Y, (position + hexVectors[top[i]]).Z); }
+        void update(double delta)
+        {
             
-            for (int i = 0; i < 3; i++) { GL.Color3(color); GL.Vertex3((position + hexVectors[topRight[i]]).X, (position + hexVectors[topRight[i]]).Y, (position + hexVectors[topRight[i]]).Z); }
+            if (Keyboard.GetState().IsKeyDown(Key.A)) {
+                moveH += 20f * (float)delta;
+            }
 
-            for (int i = 0; i < 3; i++) { GL.Color3(color); GL.Vertex3((position + hexVectors[topLeft[i]]).X, (position + hexVectors[topLeft[i]]).Y, (position + hexVectors[topLeft[i]]).Z); }
+            if (Keyboard.GetState().IsKeyDown(Key.D))
+            {
+                moveH -= 20f * (float)delta;
+            }
 
-            for (int i = 0; i < 3; i++) { GL.Color3(color); GL.Vertex3((position + hexVectors[botLeft[i]]).X, (position + hexVectors[botLeft[i]]).Y, (position + hexVectors[botLeft[i]]).Z); }
+            if (Keyboard.GetState().IsKeyDown(Key.W))
+            {
+                moveV -= 20f * (float)delta;
+            }
 
-            for (int i = 0; i < 3; i++) { GL.Color3(color); GL.Vertex3((position + hexVectors[bot[i]]).X, (position + hexVectors[bot[i]]).Y, (position + hexVectors[bot[i]]).Z); }
-
-            for (int i = 0; i < 3; i++) { GL.Color3(color); GL.Vertex3((position + hexVectors[botRight[i]]).X, (position + hexVectors[botRight[i]]).Y, (position + hexVectors[botRight[i]]).Z); }
+            if (Keyboard.GetState().IsKeyDown(Key.S))
+            {
+                moveV += 20f * (float)delta;
+            }
 
         }
+
+        private float moveH, moveV;
         
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             base.OnRenderFrame(e);
+            update(e.Time);
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            Matrix4 modelview = Matrix4.LookAt(new Vector3(0, 0, 30), Vector3.UnitZ, Vector3.UnitY);
+            
+            Matrix4 view = Matrix4.LookAt(new Vector3(0, 0, 10), Vector3.UnitZ, Vector3.UnitY);
+            Matrix4 scale = Matrix4.Scale(2.0f);
+            Matrix4 transl = Matrix4.Translation(moveH, moveV, 0);
+            Matrix4 model = Matrix4.Mult(transl, scale);
+            Matrix4 modelview = Matrix4.Mult(view, model);
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadMatrix(ref modelview);
 
-          
+            //hexMap.Draw(new Vector3(-8, 6, 0));
+            drawTexturedQuads();
+            //drawPixels();
 
-            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-
-            // Draw a single hex in the center of the screen
-            GL.Begin(BeginMode.Triangles);
-
-            // Just draw one hex
-            // 1st row, 1st col
-            Vector3 white = new Vector3(1, 1, 1);
-            //drawHex(new Vector3(0 * outerRadius(), 0, 0), white);
-            //drawHex(new Vector3(1.5f * outerRadius(), -innerRadius(), 0), white);
-            
-            //drawHex(new Vector3(3f * outerRadius(), 0, 0), white);
-            //drawHex(new Vector3(0 * outerRadius(), 2f* -innerRadius(), 0), white);
-            //drawHex(new Vector3(3f * outerRadius(), 2f * -innerRadius(), 0), white);
-
-            Vector3 vertOffset = new Vector3(-12, 8, 0);
-            Vector3 baseOffset = new Vector3(1.5f, 0, 0);
-
-            float downVal = 0;
-            for (int row = 0; row < 45; row++)
-            {
-                for (int col = 0; col < 45; col++)
-                {
-                    if (row == 0 || row % 2 == 0)
-                    {
-                        if (col % 2 == 1)
-                        {
-                            downVal = -innerRadius();
-                            //drawHex(new Vector3(col * outerRadius() * 1.5f * 2, downVal, 0) + vertOffset, new Vector3(1, 0, 0));
-                        } else
-                        {
-                            drawHex(new Vector3(col * outerRadius() * 1.5f, -innerRadius() * row, 0) + vertOffset, white);
-                        }
-                    }
-
-                    if (row % 2 == 1)
-                    {
-                        if (col % 2 == 0)
-                            drawHex(new Vector3((outerRadius() * 1.5f * col) + 1.5f, -innerRadius() * row, 0) + vertOffset, new Vector3(0, 1, 1));
-                    }
-                    
-
-                }
-            }
-
-            GL.End();
             SwapBuffers();
         }
 
-        private int loadImage(Bitmap image)
-        {
-            int texID = GL.GenTexture();
-
-            GL.BindTexture(TextureTarget.Texture2D, texID);
-            BitmapData data = image.LockBits(new System.Drawing.Rectangle(0, 0, image.Width, image.Height),
-                ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
-
-            image.UnlockBits(data);
-
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-
-            return texID;
-        }
-
-        private int loadImage(string filename)
-        {
-            try
-            {
-                Image file = Image.FromFile(filename);
-                return loadImage(new Bitmap(file));
-            }
-            catch (FileNotFoundException e)
-            {
-                return -1;
-            }
-        }
+        
 
     }
 }
